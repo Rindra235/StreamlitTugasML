@@ -228,10 +228,10 @@ st.markdown("""
 def load_damage_model():
     """Memuat model klasifikasi kerusakan."""
     try:
-        model = tf.keras.models.load_model('damage_classification_model.keras')
+        model = tf.keras.models.load_model('my_model_folder.keras')
         return model
     except Exception as e:
-        st.error(f"Error: Model file 'damage_classification_model.keras' not found or corrupted. {e}")
+        st.error(f"Error: Model file 'my_model_folder.keras' not found or corrupted. {e}")
         return None
 
 model = load_damage_model()
