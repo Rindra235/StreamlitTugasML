@@ -2,10 +2,11 @@
 
 import streamlit as st
 import numpy as np
-import tensorflow as tf
 from PIL import Image
 import pandas as pd
 import time
+import platform 
+from fastai.vision.all import * 
 
 # --- Konfigurasi Halaman & Gaya CSS ---
 st.set_page_config(
@@ -224,17 +225,23 @@ st.markdown("""
 
 # --- Fungsi & Model Loading ---
 
+plt_system = platform.system()
+if plt_system == 'Linux':
+    pathlib.WindowsPath = pathlib.PosixPath
+
 @st.cache_resource
 def load_damage_model():
-    """Memuat model klasifikasi kerusakan."""
+    """Memuat model klasifikasi kerusakan fast.ai."""
     try:
-        model = tf.keras.models.load_model('my_model_folder.keras')
-        return model
+        # Menggunakan load_learner dari fast.ai untuk file .pkl
+        learn = load_learner('custom_cnn_model.pkl')
+        return learn
     except Exception as e:
-        st.error(f"Error: Model file 'my_model_folder.keras' not found or corrupted. {e}")
+        # Pesan error disesuaikan
+        st.error(f"Error: Model file 'custom_cnn_model.pkl' not found or corrupted. {e}")
         return None
 
-model = load_damage_model()
+learn = load_damage_model()
 
 # Konfigurasi
 CLASS_NAMES = ['01-minor', '02-moderate', '03-severe']
@@ -244,24 +251,6 @@ SEVERITY_MAPPING = {
     '03-severe': 'Severe Damage'
 }
 IMG_WIDTH, IMG_HEIGHT = 150, 150
-
-def preprocess_image(image_pil):
-    """Fungsi preprocessing gambar."""
-    image = image_pil.resize((IMG_WIDTH, IMG_HEIGHT))
-    image_array = tf.keras.preprocessing.image.img_to_array(image)
-    image_array = image_array / 255.0
-    image_array = np.expand_dims(image_array, axis=0)
-    return image_array
-
-def make_prediction(image_pil):
-    """Fungsi untuk melakukan prediksi menggunakan model yang sudah diload."""
-    if model is not None:
-        processed_image = preprocess_image(image_pil)
-        prediction = model.predict(processed_image)
-        return prediction
-    else:
-        # Fallback jika model tidak tersedia
-        return np.random.rand(1, 3)
 
 def display_results(image, prediction):
     """Fungsi untuk menampilkan hasil prediksi dengan desain modern."""
@@ -390,7 +379,6 @@ def damage_assessment_upload_page():
                     time.sleep(0.02)
                     progress_bar.progress(i + 1)
                 
-                processed_image = preprocess_image(image)
                 prediction = make_prediction(image)
                 display_results(image, prediction)
 
