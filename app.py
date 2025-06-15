@@ -7,6 +7,7 @@ import time
 import platform 
 import pathlib
 from fastai.vision.all import * 
+import torch.nn as nn
 
 # --- Konfigurasi Halaman & Gaya CSS ---
 st.set_page_config(
@@ -223,6 +224,47 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# DEFINISI KELAS MODEL
+
+class CustomCNN(nn.Module):
+    def __init__(self, num_classes=3):
+        super().__init__()
+        # Lapisan Konvolusi (Tubuh Model)
+        self.body = nn.Sequential(
+            # Block 1: Conv(32) -> BN -> ReLU -> MaxPool
+            nn.Conv2d(3, 32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.BatchNorm2d(32),
+            nn.MaxPool2d(2),
+
+            # Block 2: Conv(64) -> BN -> ReLU -> MaxPool
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.BatchNorm2d(64),
+            nn.MaxPool2d(2),
+
+            # Block 3: Conv(128) -> BN -> ReLU -> MaxPool
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.BatchNorm2d(128),
+            nn.MaxPool2d(2)
+        )
+        
+        # Lapisan Fully Connected (Kepala Model)
+        # Ukuran input setelah flatten: 128 channels * 18 * 18 = 41472 (untuk input 150x150)
+        self.head = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(128 * 18 * 18, 256),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(256, num_classes)
+        )
+
+    def forward(self, x):
+        x = self.body(x)
+        x = self.head(x)
+        return x
+    
 # --- Fungsi & Model Loading ---
 
 plt_system = platform.system()
@@ -231,13 +273,11 @@ if plt_system == 'Linux':
 
 @st.cache_resource
 def load_damage_model():
-    """Memuat model klasifikasi kerusakan fast.ai."""
+    """Memuat model klasifikasi fast.ai yang telah dilatih."""
     try:
-        # Menggunakan load_learner dari fast.ai untuk file .pkl
         learn = load_learner('custom_cnn_model.pkl')
         return learn
     except Exception as e:
-        # Pesan error disesuaikan
         st.error(f"Error: Model file 'custom_cnn_model.pkl' not found or corrupted. {e}")
         return None
 
