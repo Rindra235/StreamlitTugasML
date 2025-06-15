@@ -266,7 +266,6 @@ class CustomCNN(nn.Module):
         return x
     
 # --- Fungsi & Model Loading ---
-
 plt_system = platform.system()
 if plt_system == 'Linux':
     pathlib.WindowsPath = pathlib.PosixPath
@@ -278,7 +277,7 @@ def load_damage_model():
         learn = load_learner('custom_cnn_model.pkl')
         return learn
     except Exception as e:
-        st.error(f"Error: Model file 'custom_cnn_model.pkl' not found or corrupted. {e}")
+        st.error(f"Error: Gagal memuat 'custom_cnn_model.pkl'. Pastikan file ada & tidak rusak. Detail: {e}")
         return None
 
 learn = load_damage_model()
@@ -292,46 +291,42 @@ SEVERITY_MAPPING = {
 }
 IMG_WIDTH, IMG_HEIGHT = 150, 150
 
-def display_results(image, prediction):
-    """Fungsi untuk menampilkan hasil prediksi dengan desain modern."""
+# --- Fungsi Helper ---
+def make_prediction(image_pil):
+    """Fungsi untuk melakukan prediksi menggunakan model fast.ai."""
+    if learn is not None:
+        try:
+            pred_class, pred_idx, outputs = learn.predict(image_pil)
+            prediction_array = np.expand_dims(outputs.numpy(), axis=0)
+            return prediction_array
+        except Exception as e:
+            st.error(f"Terjadi error saat prediksi: {e}")
+            return None
+    else:
+        st.warning("Model tidak berhasil dimuat, prediksi tidak dapat dilakukan.")
+        return None
+
+def display_results(prediction):
+    """Fungsi untuk menampilkan hasil prediksi."""
     predicted_class_idx = np.argmax(prediction)
     predicted_class_name = CLASS_NAMES[predicted_class_idx]
     confidence = np.max(prediction)
     severity = SEVERITY_MAPPING.get(predicted_class_name, "Unknown")
+    
+    if predicted_class_name == '01-minor':
+        st.success(f"**Predicted Severity: {severity}**", icon="✅")
+    elif predicted_class_name == '02-moderate':
+        st.warning(f"**Predicted Severity: {severity}**", icon="⚠️")
+    else:
+        st.error(f"**Predicted Severity: {severity}**", icon="🚨")
 
-    # Determine card class based on severity
-    card_class = "success" if predicted_class_name == '01-minor' else \
-                "warning" if predicted_class_name == '02-moderate' else "danger"
-    
-    st.markdown(f'<div class="result-card {card_class}">', unsafe_allow_html=True)
-    st.markdown("<h3>🎯 Assessment Results</h3>", unsafe_allow_html=True)
-    
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        if predicted_class_name == '01-minor':
-            st.success(f"**Predicted Severity: {severity}**", icon="✅")
-        elif predicted_class_name == '02-moderate':
-            st.warning(f"**Predicted Severity: {severity}**", icon="⚠️")
-        else:
-            st.error(f"**Predicted Severity: {severity}**", icon="🚨")
-    
-    with col2:
-        st.markdown(f"<div class='metric-card'><h2 style='color: black;'>{confidence:.1%}</h2><p style='color: black;'>Confidence</p></div>", 
-                   unsafe_allow_html=True)
-
-    # Confidence visualization with native Streamlit
-    st.markdown("**Confidence Analysis:**")
-    confidence_data = pd.DataFrame({
-        'Severity': ['Minor', 'Moderate', 'Severe'],
-        'Probability': prediction[0]
-    })
-    
-    # Create a simple bar chart using Streamlit's native chart
-    st.bar_chart(confidence_data.set_index('Severity'))
-    
     st.markdown("---")
-       
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown(f"**Confidence Score:**")
+    st.progress(confidence)
+    st.markdown(f"<h5 style='text-align: right; color: #6495ED;'>{confidence:.1%}</h5>", unsafe_allow_html=True)
+    st.markdown("---")
+    st.info("**What to Do Next:**", icon="➡️")
+    st.markdown("- **Document Everything:** Ambil lebih banyak foto dari berbagai sudut.\n- **Contact Us:** Hubungi hotline klaim kami di **1-800-AUTOGUARD**.")
 
 # --- Definisi Halaman ---
 
@@ -360,6 +355,7 @@ def cover_page():
         if st.button("🚀 Start Damage Assessment", key="cta_main", use_container_width=True):
             st.session_state.page = "Damage Assessment (Upload)"
             st.rerun()
+            pass # Placeholder
     
         
 def damage_assessment_upload_page():
@@ -420,7 +416,7 @@ def damage_assessment_upload_page():
                     progress_bar.progress(i + 1)
                 
                 prediction = make_prediction(image)
-                display_results(image, prediction)
+                display_results(prediction)
 
 def damage_assessment_camera_page():
     """Halaman untuk kamera dengan desain modern."""
@@ -468,9 +464,8 @@ def damage_assessment_camera_page():
                     time.sleep(0.02)
                     progress_bar.progress(i + 1)
                 
-                processed_image = preprocess_image(image)
                 prediction = make_prediction(image)
-                display_results(image, prediction)
+                display_results(prediction)
 
 def premium_and_garage_page():
     """Halaman untuk estimasi premi dan pencari bengkel dengan desain modern."""
@@ -590,6 +585,7 @@ def premium_and_garage_page():
                     st.button(f"📞 Call {row['Name']}", key=f"call_{idx}")
         
         st.markdown('</div>', unsafe_allow_html=True)
+        pass # Placeholder
 
 # --- Sidebar & Navigation ---
 with st.sidebar:
@@ -599,7 +595,18 @@ with st.sidebar:
         <p style="font-size: 0.9rem; opacity: 0.8;">AI Insurance Assistant</p>
     </div>
     """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    page = st.radio(
+        "Main Menu",
+        ["Home", "Upload Assessment", "Camera Assessment", "Premium & Garages"],
+        # key="page_nav"
+         index=0 
+    )
     
+    st.markdown("---")
+
     # Initialize session state
     if 'page' not in st.session_state:
         st.session_state.page = "Home"
@@ -634,12 +641,14 @@ with st.sidebar:
 # --- Page Routing ---
 current_page = st.session_state.get('page', 'Home')
 
-if current_page == "Home":
-    cover_page()
-elif current_page == "Damage Assessment (Upload)":
+if page == "Home":
+    cover_page() # Pastikan fungsi ini didefinisikan
+elif page == "Upload Assessment":
     damage_assessment_upload_page()
-elif current_page == "Damage Assessment (Camera)":
+elif page == "Camera Assessment":
     damage_assessment_camera_page()
+elif page == "Premium & Garages":
+    premium_and_garage_page()
 
 # --- Footer ---
 st.markdown("""
