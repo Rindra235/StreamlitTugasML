@@ -294,6 +294,23 @@ SEVERITY_MAPPING = {
 }
 IMG_WIDTH, IMG_HEIGHT = 150, 150
 
+def make_prediction(image_pil):
+    """Fungsi untuk melakukan prediksi menggunakan model fast.ai."""
+    if learn is not None:
+        try:
+            # Prediksi dengan fast.ai mengembalikan (kelas, index, probabilitas)
+            pred_class, pred_idx, outputs = learn.predict(image_pil)
+            # Kita butuh array probabilitas untuk fungsi display_results
+            # Ubah tensor output menjadi numpy array dan tambahkan dimensi batch
+            prediction_array = np.expand_dims(outputs.numpy(), axis=0)
+            return prediction_array
+        except Exception as e:
+            st.error(f"Terjadi error saat prediksi: {e}")
+            return None
+    else:
+        st.warning("Model tidak berhasil dimuat, prediksi tidak dapat dilakukan.")
+        return None
+    
 def display_results(image, prediction):
     """Fungsi untuk menampilkan hasil prediksi dengan desain modern."""
     predicted_class_idx = np.argmax(prediction)
@@ -628,7 +645,7 @@ with st.sidebar:
     st.markdown("""
     <div style="text-align: center; padding: 1rem;">
         <h4>📞 Emergency Contact</h4>
-        <h3>08xxxxxxxxxx</h3>
+        <h3>081234196677</h3>
         <p style="font-size: 0.8rem; opacity: 0.7;">© 2025 Car Grader</p>
     </div>
     """, unsafe_allow_html=True)
