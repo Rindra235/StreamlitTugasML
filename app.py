@@ -654,12 +654,14 @@ with st.sidebar:
 # --- Page Routing ---
 current_page = st.session_state.get('page', 'Home')
 
-if current_page == "Home":
+if page_to_run == "Home":
     cover_page()
-elif current_page == "Damage Assessment (Upload)":
+elif page_to_run == "Damage Assessment (Upload)":
     damage_assessment_upload_page()
-elif current_page == "Damage Assessment (Camera)":
+elif page_to_run == "Damage Assessment (Camera)":
     damage_assessment_camera_page()
+elif page_to_run == "Premium & Garages":
+    premium_and_garage_page()
 
 # --- Footer ---
 st.markdown("""
