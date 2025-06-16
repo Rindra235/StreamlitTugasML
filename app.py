@@ -327,33 +327,45 @@ def display_results(prediction):
     confidence = np.max(prediction)
     severity = SEVERITY_MAPPING.get(predicted_class_name, "Unknown")
 
+    st.markdown("<h3>🎯 Assessment Results</h3>", unsafe_allow_html=True)
+
     # Determine card class based on severity
     card_class = "success" if predicted_class_name == '01-minor' else \
                 "warning" if predicted_class_name == '02-moderate' else "danger"
     
-    st.markdown("<h3>🎯 Assessment Results</h3>", unsafe_allow_html=True)
     
     col1, col2 = st.columns([2, 1])
     with col1:
-        if predicted_class_name == '01-minor':
-            st.success(f"**Predicted Severity: {severity}**", icon="✅")
-        elif predicted_class_name == '02-moderate':
-            st.warning(f"**Predicted Severity: {severity}**", icon="⚠️")
+        # Menentukan warna latar belakang dan ikon berdasarkan tingkat keparahan
+        if severity == 'Minor Damage':
+            card_class = "success"
+            icon = "✅"
+        elif severity == 'Moderate Damage':
+            card_class = "warning"
+            icon = "⚠️"
         else:
-            st.error(f"**Predicted Severity: {severity}**", icon="🚨")
+            card_class = "danger"
+            icon = "🚨"
+        # Menggunakan st.markdown untuk membuat kartu kustom
+        st.markdown(f"""
+        <div class="result-card {card_class}" style="padding: 1.4rem;">
+            <p style='color: black; margin:0; padding:0; font-size: 0.9rem; opacity: 0.7;'>Predicted Severity</p>
+            <h4 style='color: black; margin:0; padding:0; font-weight: 600;'>{icon} {severity}</h4>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
          st.markdown(f"""
-        <div class='metric-card'>
-            <h4 style='color: black; margin:0; padding:0;'>{confidence:.1%}</h4>
-            <p style='font-size: 0.8rem; color: black; margin:0; padding:0;'>Confidence</p>-
+        <div class="metric-card" style="padding: 1.4rem;">
+             <p style='color: black; margin:0; padding:0; font-size: 0.9rem; opacity: 0.7;'>Confidence Score</p>
+            <h4 style='color: black; margin:0; padding:0; font-weight: 600;'>{confidence:.1%}</h4>
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
     # Confidence visualization with native Streamlit
-    st.markdown("**Confidence Analysis:**")
+    st.markdown("**Confidence Analysis (per Class):**")
     confidence_data = pd.DataFrame({
         'Severity': ['Minor', 'Moderate', 'Severe'],
         'Probability': prediction[0]
@@ -372,7 +384,7 @@ def cover_page():
     st.markdown("""
     <div class="hero-header">
         <h1 >🚗 Car Grader</h1>
-        <p style="font-weight: bold;" >Smarter Car Damage Assesment</p>
+        <p style="font-weight: bold;" >Smarter Car Damage Assessment</p>
         <p style="font-size: 1.1rem; margin-top: 1rem;">
             Get the Instant Result with the Power of AI
         </p>
@@ -385,7 +397,7 @@ def cover_page():
     with col2:
         st.markdown("""
         <div style="text-align: center;">
-            <h2 style="color: white; margin-bottom: 2rem;">Start the Assesment Now!</h2>
+            <h2 style="color: white; margin-bottom: 2rem;">Start the Assessment Now!</h2>
         </div>
         """, unsafe_allow_html=True)
         
@@ -416,7 +428,7 @@ def damage_assessment_upload_page():
 </style>
 <div class="modern-card">
     <h2 class="gradient-text">Upload Photo for Damage Assessment</h2>
-    <p style='color: black;'>Upload foto kerusakan kendaraan Anda yang jelas untuk mendapatkan assessment yang akurat</p>
+    <p style='color: black;'>Upload foto kerusakan kendaraan Anda yang jelas untuk mendapatkan prediksi yang akurat</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -446,7 +458,7 @@ def damage_assessment_upload_page():
     with col2:
         # Tampilkan hasil HANYA jika sudah ada di session_state
         if 'prediction' in st.session_state:
-            st.markdown("#### Assessment Results:")
+            st.markdown("#### 🎯 Assessment Results:")
             display_results(st.session_state['prediction'])
 
 def damage_assessment_camera_page():
@@ -499,7 +511,7 @@ def damage_assessment_camera_page():
         
     with col2:
         if 'prediction' in st.session_state:
-            st.markdown("#### Assessment Results:")
+            st.markdown("#### 🎯 Assessment Results:")
             display_results(st.session_state['prediction'])
 
 def premium_and_garage_page():
