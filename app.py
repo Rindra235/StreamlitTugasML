@@ -294,6 +294,11 @@ SEVERITY_MAPPING = {
 }
 IMG_WIDTH, IMG_HEIGHT = 150, 150
 
+def clear_old_results():
+    """Membersihkan hasil prediksi lama dari session state."""
+    if 'prediction' in st.session_state:
+        del st.session_state['prediction']
+
 def make_prediction(image_pil):
     """Fungsi untuk melakukan prediksi menggunakan model fast.ai."""
     if learn is not None:
@@ -411,36 +416,31 @@ def damage_assessment_upload_page():
         "Pilih file gambar (JPG, JPEG, PNG)",
         type=["jpg", "jpeg", "png"],
         help="Pastikan foto menunjukkan area kerusakan dengan jelas dan pencahayaan yang baik"
+        on_change=clear_old_results
     )
     
-    if uploaded_file:
-        col1, col2 = st.columns([1, 1.2], gap="large")
+    col1, col2 = st.columns([1, 1.2], gap="large")
         
-        with col1:
-            st.markdown('<div class="modern-card">', unsafe_allow_html=True)
-            image = Image.open(uploaded_file).convert('RGB')
-            st.image(image, caption='Uploaded Image', use_container_width=True)
+    with col1:
+            if uploaded_file:
+                image = Image.open(uploaded_file).convert('RGB')
+                st.markdown('<div class="modern-card">', unsafe_allow_html=True)
+                st.image(image, caption='Image to be Assessed', use_container_width=True)
             
-            # Image info
-            st.markdown(f"""
-            **Image Details:**
-            - Size: {image.size[0]} x {image.size[1]} pixels
-            - Format: {uploaded_file.type}
-            - File size: {len(uploaded_file.getvalue())/1024:.1f} KB
-            """)
-            st.markdown('</div>', unsafe_allow_html=True)
-        
-        with col2:
-            with st.spinner('🤖 AI sedang menganalisis gambar... Mohon tunggu.'):
-                # Simulate processing time
-                progress_bar = st.progress(0)
-                for i in range(100):
-                    time.sleep(0.02)
-                    progress_bar.progress(i + 1)
-                
+            # Tombol untuk memicu prediksi
+            if st.button("🚀 Analyze Damage", use_container_width=True):
+                with st.spinner('🤖 AI is analyzing the image...'):
+                    # Prediksi hanya berjalan saat tombol diklik
                     prediction = make_prediction(image)
-                    if prediction is not None:
-                        display_results(prediction)
+                    # Simpan hasilnya di session_state
+                    st.session_state['prediction'] = prediction
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    with col2:
+        # Tampilkan hasil HANYA jika sudah ada di session_state
+        if 'prediction' in st.session_state:
+            st.markdown("#### Assessment Results:")
+            display_results(st.session_state['prediction'])
 
 def damage_assessment_camera_page():
     """Halaman untuk kamera dengan desain modern."""
@@ -470,27 +470,30 @@ def damage_assessment_camera_page():
     
     st.info("💡 **Tips untuk foto terbaik:**\n- Pastikan pencahayaan cukup\n- Fokus pada area kerusakan\n- Ambil dari jarak yang sesuai\n- Hindari bayangan")
     
-    camera_photo = st.camera_input("📸 Ambil foto kerusakan")
+    camera_photo = st.camera_input(
+        "📸 Ambil foto kerusakan",
+        on_change=clear_old_results
+    )
 
-    if camera_photo:
-        col1, col2 = st.columns([1, 1.2], gap="large")
+    col1, col2 = st.columns([1, 1.2], gap="large")
         
-        with col1:
-            st.markdown('<div class="modern-card">', unsafe_allow_html=True)
+    with col1:
+        if camera_photo:
             image = Image.open(camera_photo).convert('RGB')
+            st.markdown('<div class="modern-card">', unsafe_allow_html=True)
             st.image(image, caption='Captured Image', use_container_width=True)
+            
+            # Tombol untuk memicu prediksi
+            if st.button("🚀 Analyze Captured Photo", use_container_width=True):
+                with st.spinner('🤖 AI is analyzing the image...'):
+                    prediction = make_prediction(image)
+                    st.session_state['prediction'] = prediction
             st.markdown('</div>', unsafe_allow_html=True)
         
-        with col2:
-            with st.spinner('🤖 AI sedang menganalisis gambar... Mohon tunggu.'):
-                progress_bar = st.progress(0)
-                for i in range(100):
-                    time.sleep(0.02)
-                    progress_bar.progress(i + 1)
-                
-                prediction = make_prediction(image)
-                if prediction is not None:
-                    display_results(prediction)
+    with col2:
+        if 'prediction' in st.session_state:
+            st.markdown("#### Assessment Results:")
+            display_results(st.session_state['prediction'])
 
 def premium_and_garage_page():
     """Halaman untuk estimasi premi dan pencari bengkel dengan desain modern."""
