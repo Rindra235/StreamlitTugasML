@@ -419,7 +419,7 @@ def damage_assessment_upload_page():
         with col1:
             st.markdown('<div class="modern-card">', unsafe_allow_html=True)
             image = Image.open(uploaded_file).convert('RGB')
-            st.image(image, caption='Uploaded Image', use_column_width=True)
+            st.image(image, caption='Uploaded Image', use_container_width=True)
             
             # Image info
             st.markdown(f"""
@@ -438,8 +438,9 @@ def damage_assessment_upload_page():
                     time.sleep(0.02)
                     progress_bar.progress(i + 1)
                 
-                prediction = make_prediction(image)
-                display_results(image, prediction)
+                    prediction = make_prediction(image)
+                    if prediction is not None:
+                        display_results(prediction)
 
 def damage_assessment_camera_page():
     """Halaman untuk kamera dengan desain modern."""
@@ -477,7 +478,7 @@ def damage_assessment_camera_page():
         with col1:
             st.markdown('<div class="modern-card">', unsafe_allow_html=True)
             image = Image.open(camera_photo).convert('RGB')
-            st.image(image, caption='Captured Image', use_column_width=True)
+            st.image(image, caption='Captured Image', use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
         
         with col2:
@@ -487,9 +488,9 @@ def damage_assessment_camera_page():
                     time.sleep(0.02)
                     progress_bar.progress(i + 1)
                 
-                processed_image = preprocess_image(image)
                 prediction = make_prediction(image)
-                display_results(image, prediction)
+                if prediction is not None:
+                    display_results(prediction)
 
 def premium_and_garage_page():
     """Halaman untuk estimasi premi dan pencari bengkel dengan desain modern."""
