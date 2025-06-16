@@ -415,7 +415,7 @@ def damage_assessment_upload_page():
     uploaded_file = st.file_uploader(
         "Pilih file gambar (JPG, JPEG, PNG)",
         type=["jpg", "jpeg", "png"],
-        help="Pastikan foto menunjukkan area kerusakan dengan jelas dan pencahayaan yang baik"
+        help="Pastikan foto menunjukkan area kerusakan dengan jelas dan pencahayaan yang baik",
         on_change=clear_old_results
     )
     
