@@ -345,8 +345,8 @@ def display_results(prediction):
     with col2:
          st.markdown(f"""
         <div class='metric-card'>
-            <h6 style='color: black; margin:0; padding:0;'>{confidence:.1%}</h6>
-            <p style='color: black; margin:0; padding:0;'>Confidence</p>
+            <h4 style='color: black; margin:0; padding:0;'>{confidence:.1%}</h4>
+            <p style='font-size: 0.5rem; color: black; margin:0; padding:0;'>Confidence</p>-
         </div>
         """, unsafe_allow_html=True)
 
