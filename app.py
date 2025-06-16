@@ -345,7 +345,7 @@ def display_results(prediction):
     with col2:
          st.markdown(f"""
         <div class='metric-card'>
-            <h4 style='color: black; margin:0; padding:0;'>{confidence:.1%}</h4>
+            <h6 style='color: black; margin:0; padding:0;'>{confidence:.1%}</h6>
             <p style='color: black; margin:0; padding:0;'>Confidence</p>
         </div>
         """, unsafe_allow_html=True)
@@ -372,9 +372,9 @@ def cover_page():
     st.markdown("""
     <div class="hero-header">
         <h1 >🚗 Car Grader</h1>
-        <p>Smarter Car Damage Assesment</p>
+        <p style="font-weight: bold;" >Smarter Car Damage Assesment</p>
         <p style="font-size: 1.1rem; margin-top: 1rem;">
-            Get the Instant Result With the Power of AI
+            Get the Instant Result with the Power of AI
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -385,7 +385,7 @@ def cover_page():
     with col2:
         st.markdown("""
         <div style="text-align: center;">
-            <h2 style="color: white; margin-bottom: 2rem;">Mulai Assessment Sekarang!</h2>
+            <h2 style="color: white; margin-bottom: 2rem;">Start the Assesment Now!</h2>
         </div>
         """, unsafe_allow_html=True)
         
