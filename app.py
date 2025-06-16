@@ -200,8 +200,8 @@ st.markdown("""
     /* Custom Metrics */
     .metric-card {
         background: linear-gradient(135deg, #e3ffe7 0%, #d9e7ff 100%);
-        padding: 1.5rem;
-        border-radius: 15px;
+        padding: 1rem;
+        border-radius: 10px;
         text-align: center;
         box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         margin: 0.5rem 0;
@@ -432,7 +432,6 @@ def damage_assessment_upload_page():
     with col1:
             if uploaded_file:
                 image = Image.open(uploaded_file).convert('RGB')
-                st.markdown('<div class="modern-card">', unsafe_allow_html=True)
                 st.image(image, caption='Image to be Assessed', use_container_width=True)
             
             # Tombol untuk memicu prediksi
