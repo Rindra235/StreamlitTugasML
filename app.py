@@ -317,7 +317,11 @@ def make_prediction(image_pil):
         return None
     
 def display_results(prediction):
-    """Fungsi untuk menampilkan hasil prediksi dengan desain modern."""
+    """Fungsi untuk menampilkan hasil prediksi dengan desain yang disederhanakan."""
+    if prediction is None:
+        st.error("Gagal mendapatkan hasil prediksi.")
+        return
+
     predicted_class_idx = np.argmax(prediction)
     predicted_class_name = CLASS_NAMES[predicted_class_idx]
     confidence = np.max(prediction)
@@ -327,7 +331,6 @@ def display_results(prediction):
     card_class = "success" if predicted_class_name == '01-minor' else \
                 "warning" if predicted_class_name == '02-moderate' else "danger"
     
-    st.markdown(f'<div class="result-card {card_class}">', unsafe_allow_html=True)
     st.markdown("<h3>🎯 Assessment Results</h3>", unsafe_allow_html=True)
     
     col1, col2 = st.columns([2, 1])
@@ -340,8 +343,14 @@ def display_results(prediction):
             st.error(f"**Predicted Severity: {severity}**", icon="🚨")
     
     with col2:
-        st.markdown(f"<div class='metric-card'><h2 style='color: black;'>{confidence:.1%}</h2><p style='color: black;'>Confidence</p></div>", 
-                   unsafe_allow_html=True)
+         st.markdown(f"""
+        <div class='metric-card'>
+            <h4 style='color: black; margin:0; padding:0;'>{confidence:.1%}</h4>
+            <p style='color: black; margin:0; padding:0;'>Confidence</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
 
     # Confidence visualization with native Streamlit
     st.markdown("**Confidence Analysis:**")
@@ -355,7 +364,6 @@ def display_results(prediction):
     
     st.markdown("---")
        
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # --- Definisi Halaman ---
 
@@ -364,9 +372,9 @@ def cover_page():
     st.markdown("""
     <div class="hero-header">
         <h1 >🚗 Car Grader</h1>
-        <p>Deteksi Keparahan Kerusakan Mobil</p>
+        <p>Smarter Car Damage Assesment</p>
         <p style="font-size: 1.1rem; margin-top: 1rem;">
-            Deteksi kerusakan kendaraan dalam hitungan detik dengan teknologi AI terdepan
+            Get the Instant Result With the Power of AI
         </p>
     </div>
     """, unsafe_allow_html=True)
