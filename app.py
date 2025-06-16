@@ -311,7 +311,7 @@ def make_prediction(image_pil):
         st.warning("Model tidak berhasil dimuat, prediksi tidak dapat dilakukan.")
         return None
     
-def display_results(image, prediction):
+def display_results(prediction):
     """Fungsi untuk menampilkan hasil prediksi dengan desain modern."""
     predicted_class_idx = np.argmax(prediction)
     predicted_class_name = CLASS_NAMES[predicted_class_idx]
