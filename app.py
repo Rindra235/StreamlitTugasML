@@ -327,8 +327,6 @@ def display_results(prediction):
     confidence = np.max(prediction)
     severity = SEVERITY_MAPPING.get(predicted_class_name, "Unknown")
 
-    st.markdown("<h3>🎯 Assessment Results</h3>", unsafe_allow_html=True)
-
     # Determine card class based on severity
     card_class = "success" if predicted_class_name == '01-minor' else \
                 "warning" if predicted_class_name == '02-moderate' else "danger"
